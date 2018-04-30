@@ -24,20 +24,18 @@ def RetrFile(name, sock):
 def downloadFile(name, sock):
     # TODO: проерка название файла на повторы
     filename = sock.recv(1024).decode()
-    filesize = sock.recv(1024).decode()
-    print(filename)
-    print(filesize)
-    # f = open('new_' + filename, 'wb')
-    # data = sock.recv(1024)
-    # totalRecv = len(data)
-    # f.write(data)
-    # while totalRecv < filesize:
-    #     data = sock.recv(1024)
-    #     totalRecv += len(data)
-    #     f.write(data)
-    #     print("{0:.2f}".format((totalRecv / float(filesize)) * 100) + "% Done")
-    # print("Download Complete!")
-    # f.close()
+    filesize = int(sock.recv(1024).decode())
+    f = open('new_' + filename, 'wb')
+    data = sock.recv(1024)
+    totalRecv = len(data)
+    f.write(data)
+    while totalRecv < filesize:
+        data = sock.recv(1024)
+        totalRecv += len(data)
+        f.write(data)
+        print("{0:.2f}".format((totalRecv / float(filesize)) * 100) + "% Done")
+    print("Download Complete!")
+    f.close()
     sock.close()
 
 def Main():
