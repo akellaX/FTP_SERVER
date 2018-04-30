@@ -1,11 +1,8 @@
 import socket
 import threading
 import os
-import time
 
-
-def RetrFile(name, sock):
-    filename = sock.recv(1024).decode()
+def RetrFile(sock, filename):
     if os.path.isfile(filename):
         sock.send(("EXISTS " + str(os.path.getsize(filename))).encode())
         userResponse = sock.recv(1024).decode()
@@ -22,9 +19,8 @@ def RetrFile(name, sock):
 
     sock.close()
 
-def downloadFile(name, sock):
+def downloadFile(sock, filename):
     # TODO: проерка название файла на повторы
-    filename = sock.recv(1024).decode()
     print (filename)
     filesize = int(sock.recv(1024).decode())
     f = open('new_' + filename, 'wb')
@@ -41,11 +37,23 @@ def downloadFile(name, sock):
     f.close()
     sock.close()
 
-def sendListFiles(name, sock):
+def sendListFiles(sock):
     filelist = [f for f in os.listdir(os.getcwd()) if os.path.isfile(os.path.join(os.getcwd(), f))]
     filelist = "#".join(filelist)
     print(filelist)
     sock.send(filelist.encode())
+
+def listenCommand(name, sock):
+    command = sock.recv(1024).decode().split(" ")
+    print(command)
+    if command[0].lower() == 'dir':
+        sendListFiles(sock)
+    if command[0].lower() == 'get':
+        RetrFile(sock, command[1])
+    if command[0].lower() == 'put':
+        downloadFile(sock, command[1])
+
+
 
 def Main():
     host = '127.0.0.1'
@@ -60,9 +68,7 @@ def Main():
     while True:
         c, addr = s.accept()
         print("client connedted ip:<" + str(addr) + ">")
-        # t = threading.Thread(target=RetrFile, args=("RetrThread", c))
-        # t = threading.Thread(target=downloadFile, args=("DownloadThread", c))
-        t = threading.Thread(target=sendListFiles, args=("ListThread", c))
+        t = threading.Thread(target=listenCommand, args=("listenThread", c))
         t.start()
 
     s.close()
