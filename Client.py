@@ -1,4 +1,5 @@
 import socket
+import os
 
 def file2server(filename, threadname, sock):
     if os.path.isfile(filename):
@@ -17,6 +18,13 @@ def file2server(filename, threadname, sock):
 
     sock.close()
 
+def sendfile(filename, s):
+    c, addr = s.accept()
+    s.send(filename.encode())
+    s.send(str(os.path.getsize(filename)).encode())
+    # file2server(filename, "RetrThread", c)
+    
+
 def Main():
     host = '127.0.0.1'
     port = 5000
@@ -30,8 +38,7 @@ def Main():
     filename = input("Filename? -> ")
 
     if filename != 'q' and mode == 'upload':
-        t = threading.Thread(target=RetrFile, args=(filename, "RetrThread", c))
-        t.start()
+        sendfile(filename, s)
 
     if filename != 'q' and mode == 'download':
         s.send(filename.encode())
