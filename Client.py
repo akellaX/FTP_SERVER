@@ -5,7 +5,8 @@ def file2server(filename, sock):
     with open(filename, 'rb') as f:
         bytesToSend = f.read(1024)
         sock.send(bytesToSend)
-        while bytesToSend != "":
+        while bytesToSend != b'':
+            print (bytesToSend)
             bytesToSend = f.read(1024)
             sock.send(bytesToSend)
     sock.close()
@@ -25,8 +26,6 @@ def Main():
 
     s = socket.socket()
     s.connect((host, port))
-
-
 
     filename = input("Filename? -> ")
 

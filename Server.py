@@ -24,6 +24,7 @@ def RetrFile(name, sock):
 def downloadFile(name, sock):
     # TODO: проерка название файла на повторы
     filename = sock.recv(1024).decode()
+    print (filename)
     filesize = int(sock.recv(1024).decode())
     f = open('new_' + filename, 'wb')
     data = sock.recv(1024)
