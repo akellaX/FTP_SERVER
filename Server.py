@@ -17,7 +17,7 @@ def RetrFile(name, sock):
                     bytesToSend = f.read(1024)
                     sock.send(bytesToSend)
     else:
-        sock.send("ERR ").decode()
+        sock.send("ERR ".decode())
 
     sock.close()
 
