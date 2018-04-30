@@ -1,15 +1,39 @@
 import socket
 
+def file2server(filename, threadname, sock):
+    if os.path.isfile(filename):
+        sock.send(("EXISTS " + str(os.path.getsize(filename))).encode())
+        userResponse = sock.recv(1024).decode()
+        print(userResponse)
+        if userResponse[:2] == 'OK':
+            with open(filename, 'rb') as f:
+                bytesToSend = f.read(1024)
+                sock.send(bytesToSend)
+                while bytesToSend != "":
+                    bytesToSend = f.read(1024)
+                    sock.send(bytesToSend)
+    else:
+        sock.send("ERR ").decode()
+
+    sock.close()
 
 def Main():
     host = '127.0.0.1'
     port = 5000
+    mode = 'upload'
 
     s = socket.socket()
     s.connect((host, port))
 
+
+
     filename = input("Filename? -> ")
-    if filename != 'q':
+
+    if filename != 'q' and mode == 'upload':
+        t = threading.Thread(target=RetrFile, args=(filename, "RetrThread", c))
+        t.start()
+
+    if filename != 'q' and mode == 'download':
         s.send(filename.encode())
         data = s.recv(1024).decode()
         print(data)
