@@ -1,5 +1,6 @@
 import socket
 import os
+import time
 
 def file2server(filename, sock):
     with open(filename, 'rb') as f:
@@ -8,6 +9,8 @@ def file2server(filename, sock):
         while bytesToSend != "":
             bytesToSend = f.read(1024)
             sock.send(bytesToSend)
+    confirm = sock.recv(1024).decode()
+    print(confirm)
     sock.close()
     
 def sendfile(filename, s):
@@ -16,12 +19,16 @@ def sendfile(filename, s):
     s.send(str(os.path.getsize(filename)).encode())
     file2server(filename, s)
     return 0
+
+def getFiles(s):
+    filelist = s.recv(2048).decode().split("#")
+    print(filelist)
     
 
 def Main():
     host = '127.0.0.1'
     port = 5000
-    mode = 'upload'
+    mode = 'getfiles'
 
     s = socket.socket()
     s.connect((host, port))
@@ -29,6 +36,9 @@ def Main():
 
 
     filename = input("Filename? -> ")
+
+    if filename != 'q' and mode == 'getfiles':
+        getFiles(s)
 
     if filename != 'q' and mode == 'upload':
         sendfile(filename, s)
