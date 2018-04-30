@@ -44,14 +44,21 @@ def sendListFiles(sock):
     sock.send(filelist.encode())
 
 def listenCommand(name, sock):
-    command = sock.recv(1024).decode().split(" ")
-    print(command)
-    if command[0].lower() == 'dir':
-        sendListFiles(sock)
-    if command[0].lower() == 'get':
-        RetrFile(sock, command[1])
-    if command[0].lower() == 'put':
-        downloadFile(sock, command[1])
+    while True:
+        command = sock.recv(1024).decode()
+        print (command)
+        command = command.split(" ")
+        print(command)
+        if command[0].lower() == 'dir':
+            sendListFiles(sock)
+        elif command[0].lower() == 'get':
+            RetrFile(sock, command[1])
+        elif command[0].lower() == 'put':
+            downloadFile(sock, command[1])
+        elif command[0].lower() == 'close':
+            break
+        else:
+            print ('no such command')
 
 
 
