@@ -9,7 +9,7 @@ def file2server(filename, sock):
             bytesToSend = f.read(1024)
             sock.send(bytesToSend)
     sock.close()
-
+    
 def sendfile(filename, s):
     if not os.path.isfile(filename): return -1
     s.send(filename.encode())
