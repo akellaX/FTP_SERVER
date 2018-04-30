@@ -16,12 +16,13 @@ def file2server(filename, sock):
     
 def sendfile(filename, s):
     if not os.path.isfile(filename): return -1
-    s.send(filename.encode())
+    s.send(('put '+filename).encode())
     s.send(str(os.path.getsize(filename)).encode())
     file2server(filename, s)
     return 0
 
 def getFiles(s):
+    s.send('dir'.encode())
     filelist = s.recv(2048).decode().split("#")
     print(filelist)
     
@@ -29,44 +30,51 @@ def getFiles(s):
 def Main():
     host = '127.0.0.1'
     port = 5000
-    mode = 'getfiles'
 
-    s = socket.socket()
-    s.connect((host, port))
+    while True:
 
-    filename = input("Filename? -> ")
 
-    if filename != 'q' and mode == 'getfiles':
-        getFiles(s)
+        mode = input("enter command? -> ")
 
-    if filename != 'q' and mode == 'upload':
-        sendfile(filename, s)
+        s = socket.socket()
+        s.connect((host, port))
 
-    if filename != 'q' and mode == 'download':
-        s.send(filename.encode())
-        data = s.recv(1024).decode()
-        print(data)
-        if data[:6] == 'EXISTS':
-            filesize = int(data[6:])
-            message = input("File exists, " + str(filesize) + "Bytes, download? (Y/N)? -> ")
-            if message == 'Y':
-                message = 'OK'
-                s.send(message.encode())
-                f = open('new_' + filename, 'wb')
-                data = s.recv(1024)
-                totalRecv = len(data)
-                f.write(data)
-                while totalRecv < filesize:
+        if mode == 'exit':
+            break
+
+        if mode == 'ls':
+            getFiles(s)
+
+        if mode == 'upload':
+            filename = input("Filename? -> ")
+            sendfile(filename, s)
+
+        if mode == 'download':
+            filename = input("Filename? -> ")
+            s.send(('get '+filename).encode())
+            data = s.recv(1024).decode()
+            print(data)
+            if data[:6] == 'EXISTS':
+                filesize = int(data[6:])
+                message = input("File exists, " + str(filesize) + "Bytes, download? (Y/N)? -> ")
+                if message == 'Y':
+                    message = 'OK'
+                    s.send(message.encode())
+                    f = open('new_' + filename, 'wb')
                     data = s.recv(1024)
-                    totalRecv += len(data)
+                    totalRecv = len(data)
                     f.write(data)
-                    print("{0:.2f}".format((totalRecv / float(filesize)) * 100) + "% Done")
-                print("Download Complete!")
-                f.close()
-        else:
-            print("File Does Not Exist!")
+                    while totalRecv < filesize:
+                        data = s.recv(1024)
+                        totalRecv += len(data)
+                        f.write(data)
+                        print("{0:.2f}".format((totalRecv / float(filesize)) * 100) + "% Done")
+                    print("Download Complete!")
+                    f.close()
+            else:
+                print("File Does Not Exist!")
 
-    s.close()
+        s.close()
 
 
 if __name__ == '__main__':
