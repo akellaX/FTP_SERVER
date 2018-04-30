@@ -1,19 +1,25 @@
 import socket
 import os
 import time
+import sys
 
 def cls():
     os.system('cls' if os.name=='nt' else 'clear')
 
 
 def file2server(filename, sock):
+    toSend = int(os.path.getsize(filename))
+    sended = 0
     with open(filename, 'rb') as f:
         bytesToSend = f.read(1024)
+        sended += len(bytesToSend)
         sock.send(bytesToSend)
         while bytesToSend != b'':
-            print (bytesToSend)
+            # print (bytesToSend)
             bytesToSend = f.read(1024)
             sock.send(bytesToSend)
+            sended += len(bytesToSend)
+            print('uploading: {}/{} bytes'.format(sended,toSend))
     confirm = sock.recv(1024).decode()
     print(confirm)
     sock.close()
@@ -25,18 +31,19 @@ def sendfile(filename, s):
     print (filename.split(' ')[1])
     time.sleep(3)
     s.send(str(os.path.getsize(filename.split(' ')[1])).encode())
+    time.sleep(3)
     file2server(filename.split(' ')[1], s)
     # return 0
 
 def getFiles(s):
-    print ('try get files')
+    # print ('try get files')
     s.send('dir'.encode())
     filelist = s.recv(2048).decode().split("#")
     for f in filelist: print(f)
     
 
 def Main():
-    host = '127.0.0.1'
+    host = '192.168.0.93'
     port = 5000
 
     
@@ -67,11 +74,18 @@ def Main():
             print ('get [filename] to download file from serever')
             print ('cls to clear terminal')
 
+        if mode[:4] == 'host':
+            host = mode.split(' ')[1]
+
+        if mode[:4] == 'port':
+            host = int(mode.split(' ')[1])
+
         elif mode == 'cls':
             cls()
             continue
 
         elif mode == 'exit':
+            s.send('close'.encode())
             break
 
         # if mode == 'ls':
@@ -98,6 +112,7 @@ def Main():
                     s.send(message.encode())
                     f = open('new_' + filename, 'wb')
                     data = s.recv(1024)
+                    print ('kek')
                     totalRecv = len(data)
                     f.write(data)
                     while totalRecv < filesize:
@@ -111,6 +126,7 @@ def Main():
                 print("File Does Not Exist!")
 
         else:
+            s.close()
             continue
 
         s.close()
