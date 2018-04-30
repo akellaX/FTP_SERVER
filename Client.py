@@ -1,26 +1,22 @@
 import socket
 import os
 
-def file2server(filename, threadname, sock):
-    if os.path.isfile(filename):
-        sock.send(("EXISTS " + str(os.path.getsize(filename))).encode())
-        userResponse = sock.recv(1024).decode()
-        print(userResponse)
-        if userResponse[:2] == 'OK':
-            with open(filename, 'rb') as f:
-                bytesToSend = f.read(1024)
-                sock.send(bytesToSend)
-                while bytesToSend != "":
-                    bytesToSend = f.read(1024)
-                    sock.send(bytesToSend)
-    else:
-        sock.send("ERR ").decode()
-
+def file2server(filename, sock):
+    with open(filename, 'rb') as f:
+        bytesToSend = f.read(1024)
+        sock.send(bytesToSend)
+        while bytesToSend != "":
+            bytesToSend = f.read(1024)
+            sock.send(bytesToSend)
     sock.close()
     
 def sendfile(filename, s):
+    if not os.path.isfile(filename): return -1
     s.send(filename.encode())
     s.send(str(os.path.getsize(filename)).encode())
+    file2server(filename, s)
+    return 0
+    
 
 def Main():
     host = '127.0.0.1'
