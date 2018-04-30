@@ -19,10 +19,8 @@ def file2server(filename, threadname, sock):
     sock.close()
     
 def sendfile(filename, s):
-    c, addr = s.accept()
     s.send(filename.encode())
     s.send(str(os.path.getsize(filename)).encode())
-    # file2server(filename, "RetrThread", c)
 
 def Main():
     host = '127.0.0.1'
