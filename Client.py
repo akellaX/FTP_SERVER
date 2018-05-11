@@ -43,7 +43,7 @@ def getFiles(s):
     
 
 def Main():
-    host = '192.168.0.93'
+    host = '127.0.0.1'
     port = 5000
 
     
@@ -106,13 +106,16 @@ def Main():
             print(data)
             if data[:6] == 'EXISTS':
                 filesize = int(data[6:])
+                if filesize <= 0: 
+                    print ('empty file!')
+                    input()
+                    continue
                 message = input("File exists, " + str(filesize) + "Bytes, download? (Y/N)? -> ")
                 if message == 'Y':
                     message = 'OK'
                     s.send(message.encode())
                     f = open('new_' + filename, 'wb')
                     data = s.recv(1024)
-                    print ('kek')
                     totalRecv = len(data)
                     f.write(data)
                     while totalRecv < filesize:

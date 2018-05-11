@@ -45,7 +45,10 @@ def sendListFiles(sock):
 
 def listenCommand(name, sock):
     while True:
-        command = sock.recv(1024).decode()
+        try:
+            command = sock.recv(1024).decode()
+        except:
+            break
         print (command)
         command = command.split(" ")
         print(command)
